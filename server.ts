@@ -6,8 +6,8 @@ import type { TLSSocket } from "node:tls";
 try {
   // Read the files
   const serverKey = fs.readFileSync("certs/server.key");
-  const serverCert = fs.readFileSync("certs/server.crt"); // Using individual cert
-  const caCert = fs.readFileSync("certs/ca-chain.crt"); // Using full CA chain
+  const serverCert = fs.readFileSync("certs/server-chain.crt"); // Using individual cert
+  const caCert = fs.readFileSync("certs/rootCA.crt"); // Using full CA chain
 
   function isTlsSocket(socket: unknown): socket is TLSSocket {
     return !!socket && typeof socket === "object" && "authorized" in socket;

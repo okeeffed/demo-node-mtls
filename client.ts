@@ -6,8 +6,8 @@ import axios from "axios";
 // Read the files with better error handling
 try {
   const clientKey = fs.readFileSync("certs/client.key");
-  const clientCert = fs.readFileSync("certs/client.crt"); // Using individual cert, not chain
-  const caCert = fs.readFileSync("certs/ca-chain.crt"); // Using full CA chain
+  const clientCert = fs.readFileSync("certs/client-chain.crt"); // Using individual cert, not chain
+  const caCert = fs.readFileSync("certs/rootCA.crt"); // Using full CA chain
 
   const agent = new https.Agent({
     key: clientKey,

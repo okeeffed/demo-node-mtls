@@ -3,22 +3,14 @@
 # Create directories for better organization
 mkdir -p certs
 
-# Better extension configurations
-cat > server-ext.cnf <<EOF
-[ext]
-basicConstraints = CA:FALSE
-keyUsage = digitalSignature, keyEncipherment
-extendedKeyUsage = serverAuth
-subjectAltName = DNS:localhost
-EOF
+# Root private key
+openssl genrsa -out certs/rootCA.key 4096
 
-cat > client-ext.cnf <<EOF
-[ext]
-basicConstraints = CA:FALSE
-keyUsage = digitalSignature, keyEncipherment
-extendedKeyUsage = clientAuth
-EOF
+# Root self-signed certificate
+openssl req -x509 -new -nodes -key certs/rootCA.key -sha256 -days 3650 \
+  -subj "/CN=MyRootCA" -out certs/rootCA.crt
 
+# Intermediate CA config
 cat > intermediate-ext.cnf <<EOF
 [ext]
 basicConstraints = critical, CA:TRUE, pathlen:0
@@ -26,13 +18,6 @@ keyUsage = critical, digitalSignature, cRLSign, keyCertSign
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer
 EOF
-
-# Root private key
-openssl genrsa -out certs/rootCA.key 4096
-
-# Root self-signed certificate
-openssl req -x509 -new -nodes -key certs/rootCA.key -sha256 -days 3650 \
-  -subj "/CN=MyRootCA" -out certs/rootCA.crt
 
 # Intermediate CA private key
 openssl genrsa -out certs/intermediateCA.key 4096
@@ -46,6 +31,15 @@ openssl x509 -req -in certs/intermediateCA.csr -CA certs/rootCA.crt -CAkey certs
   -CAcreateserial -out certs/intermediateCA.crt -days 1825 -sha256 \
   -extfile intermediate-ext.cnf -extensions ext
 
+# Server config
+cat > server-ext.cnf <<EOF
+[ext]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = DNS:localhost
+EOF
+
 # Server private key
 openssl genrsa -out certs/server.key 2048
 
@@ -57,6 +51,14 @@ openssl req -new -key certs/server.key -out certs/server.csr \
 openssl x509 -req -in certs/server.csr -CA certs/intermediateCA.crt -CAkey certs/intermediateCA.key \
   -CAcreateserial -out certs/server.crt -days 825 -sha256 \
   -extfile server-ext.cnf -extensions ext
+
+# Client config
+cat > client-ext.cnf <<EOF
+[ext]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth
+EOF
 
 # Client private key
 openssl genrsa -out certs/client.key 2048
