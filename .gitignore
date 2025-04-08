@@ -5,3 +5,6 @@ node_modules/
 *.key
 *.srl
 *.cnf
+
+# Go binary
+generate_certs
